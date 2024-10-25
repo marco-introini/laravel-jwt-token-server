@@ -19,10 +19,12 @@ class JwtTokenFactory extends Factory
             'audience' => $this->faker->word(),
             'expiration_time' => Carbon::now(),
             'iat' => Carbon::now(),
+            'custom_claims' => [],
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
 
             'user_id' => User::factory(),
         ];
     }
+
 }

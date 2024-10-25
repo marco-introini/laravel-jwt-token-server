@@ -8,9 +8,8 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('jwt_tokens', function (Blueprint $table) {
-            $table->id();
+            $table->uuid()->primary();
             $table->foreignId('user_id');
-            $table->string('uuid');
             $table->string('subject');
             $table->string('audience');
             $table->dateTime('expiration_time')->nullable();
