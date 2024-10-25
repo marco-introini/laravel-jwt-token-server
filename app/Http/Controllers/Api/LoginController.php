@@ -12,16 +12,20 @@ class LoginController extends ApiController
         $email = request()->input('email');
         $password = request()->input('password');
 
-        $user = User::where('email',$email)->first();
+        $user = User::where('email', $email)->first();
 
         if (is_null($user)) {
             return $this->error("User not found", 404);
         }
 
-        if (Hash::check($password,$user->password)) {
+        if (!Hash::check($password, $user->password)) {
             return $this->error("Wrong Password", 403);
         }
 
-        return $this->success("$email - $password", null);
+        $token = $user->jwtTokens()->create();
+
+        return $this->success("Login Successful", [
+            'token' => $token->getJwtHS256(),
+        ]);
     }
 }

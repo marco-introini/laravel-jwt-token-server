@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Helpers\JwtHelpers;
 use App\Models\Scopes\ActiveJwtScope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,14 +13,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[ScopedBy(ActiveJwtScope::class)]
 class JwtToken extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids;
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function getPayload(): string
+    protected function getPayload(): string
     {
         $now = time();
         $this->expires_at = $now + config('jwt.ttl');
@@ -48,13 +50,13 @@ class JwtToken extends Model
         $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
         $payload = $this->getPayload();
 
-        $base64UrlHeader = base64_encode($header);
-        $base64UrlPayload = base64_encode($payload);
+        $base64UrlHeader = JwtHelpers::base64UrlEncode($header);
+        $base64UrlPayload = JwtHelpers::base64UrlEncode($payload);
         $signature = hash_hmac(algo: 'sha256',
             data: $base64UrlHeader.".".$base64UrlPayload,
             key: config('jwt.secret'),
             binary: true);
-        $base64UrlSignature = base64_encode($signature);
+        $base64UrlSignature = JwtHelpers::base64UrlEncode($signature);
         return $base64UrlHeader.".".$base64UrlPayload.".".$base64UrlSignature;
     }
 

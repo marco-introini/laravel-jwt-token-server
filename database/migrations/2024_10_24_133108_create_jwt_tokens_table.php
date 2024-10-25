@@ -8,7 +8,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('jwt_tokens', function (Blueprint $table) {
-            $table->uuid()->primary();
+            $table->uuid('id')->primary();
             $table->foreignId('user_id');
             $table->dateTime('expires_at')->nullable();
             $table->json('custom_claims')->nullable();
