@@ -10,10 +10,7 @@ return new class extends Migration {
         Schema::create('jwt_tokens', function (Blueprint $table) {
             $table->uuid()->primary();
             $table->foreignId('user_id');
-            $table->string('subject');
-            $table->string('audience');
-            $table->dateTime('expiration_time')->nullable();
-            $table->dateTime('iat')->nullable();
+            $table->dateTime('expires_at')->nullable();
             $table->json('custom_claims')->nullable();
             $table->timestamps();
         });

@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\ActiveJwtScope;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[ScopedBy(ActiveJwtScope::class)]
 class JwtToken extends Model
 {
     use HasFactory;
@@ -18,6 +21,8 @@ class JwtToken extends Model
     public function getPayload(): string
     {
         $now = time();
+        $this->expires_at = $now + config('jwt.ttl');
+        $this->save();
 
         return json_encode([
             'jti' => $this->uuid,
@@ -33,8 +38,7 @@ class JwtToken extends Model
     protected function casts(): array
     {
         return [
-            'expiration_time' => 'datetime',
-            'iat' => 'datetime',
+            'expires_at' => 'datetime',
             'custom_claims' => 'array'
         ];
     }
