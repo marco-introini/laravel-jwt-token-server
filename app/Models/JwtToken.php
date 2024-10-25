@@ -15,6 +15,21 @@ class JwtToken extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function getPayload(): string
+    {
+        $now = time();
+
+        return json_encode([
+            'jti' => $this->uuid,
+            'sub' => $this->user->email,
+            'aud' => config('jwt.aud'),
+            'iss' => config('jwt.iss'),
+            'iat' => $now,
+            'exp' => $now + config('jwt.ttl'),
+            'data' => $this->custom_claims,
+        ]);
+    }
+
     protected function casts(): array
     {
         return [
@@ -23,4 +38,25 @@ class JwtToken extends Model
             'custom_claims' => 'array'
         ];
     }
+
+    public function getJwtHS256(): string
+    {
+        $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
+        $payload = $this->getPayload();
+
+        $base64UrlHeader = base64_encode($header);
+        $base64UrlPayload = base64_encode($payload);
+        $signature = hash_hmac(algo: 'sha256',
+            data: $base64UrlHeader.".".$base64UrlPayload,
+            key: config('jwt.secret'),
+            binary: true);
+        $base64UrlSignature = base64_encode($signature);
+        return $base64UrlHeader.".".$base64UrlPayload.".".$base64UrlSignature;
+    }
+
+    public function checkJwtHS256(string $token): bool
+    {
+        return $token === $this->getJwtHS256();
+    }
+
 }
