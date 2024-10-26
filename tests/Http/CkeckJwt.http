@@ -1,6 +1,7 @@
+### Check Hs256 JWT Token
 GET http://jwt-token-server.test/api/checkHs256
 Content-Type: application/json
 Accept: application/json
-Authorization: Bearer XXXX
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI5ZDU2MzE3MS02ZTBhLTQxODMtYjgxZi1iMTE5MmUzMzEyOGUiLCJzdWIiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiYXVkIjoiaHR0cDpcL1wvand0LXRva2VuLXNlcnZlci50ZXN0IiwiaXNzIjoiaHR0cDpcL1wvand0LXRva2VuLXNlcnZlci50ZXN0IiwiaWF0IjoxNzI5OTM1MjIyLCJleHAiOjE3Mjk5Mzg4MjIsImRhdGEiOm51bGx9.aBc0Efa21oTcnTwvsMoJvR5IQGEAR6FHDYy3TYxXn9E
 
 ###

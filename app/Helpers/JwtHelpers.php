@@ -53,7 +53,7 @@ class JwtHelpers
         $jwtToken->save();
 
         return json_encode([
-            'jti' => $jwtToken->uuid,
+            'jti' => $jwtToken->id,
             'sub' => $jwtToken->user->email,
             'aud' => config('jwt.aud'),
             'iss' => config('jwt.iss'),

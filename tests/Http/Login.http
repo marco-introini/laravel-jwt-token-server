@@ -1,4 +1,4 @@
-### GET request to example server
+### Login
 GET http://jwt-token-server.test/api/login
 Content-Type: application/json
 Accept: application/json
