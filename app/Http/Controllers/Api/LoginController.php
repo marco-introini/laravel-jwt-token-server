@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\JwtHelpers;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
@@ -25,7 +26,7 @@ class LoginController extends ApiController
         $token = $user->jwtTokens()->create();
 
         return $this->success("Login Successful", [
-            'token' => $token->getJwtHS256(),
+            'token' => JwtHelpers::getJwtHS256($token),
         ]);
     }
 }
