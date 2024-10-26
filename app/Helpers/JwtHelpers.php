@@ -12,7 +12,7 @@ class JwtHelpers
         return rtrim(strtr(base64_encode($input), '+/', '-_'), '=');
     }
 
-    public static function getJwtHS256(JwtToken $jwtToken): string
+    public static function createJwtHS256(JwtToken $jwtToken): string
     {
         $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
         $payload = self::getPayload($jwtToken);
@@ -25,6 +25,21 @@ class JwtHelpers
             binary: true);
         $base64UrlSignature = self::base64UrlEncode($signature);
         return $base64UrlHeader.".".$base64UrlPayload.".".$base64UrlSignature;
+    }
+
+    public static function checkJwtHS256(string $jwtToken): bool
+    {
+        $tokenParts = explode('.', $jwtToken);
+        if (count($tokenParts) !== 3) {
+            return false;
+        }
+        $header = base64_decode($tokenParts[0]);
+        $payload = base64_decode($tokenParts[1]);
+        $signature = base64_decode($tokenParts[2]);
+        $expectedSignature = hash_hmac(algo: 'sha256',
+            data: $tokenParts[0].".".$tokenParts[1],
+            key: config('jwt.secret'),
+            binary: true);
     }
 
     protected static function getPayload(JwtToken $jwtToken): string
