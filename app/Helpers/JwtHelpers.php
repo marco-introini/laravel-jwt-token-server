@@ -27,7 +27,7 @@ class JwtHelpers
         return $base64UrlHeader.".".$base64UrlPayload.".".$base64UrlSignature;
     }
 
-    public static function checkJwtHS256(string $jwtToken): bool
+    public static function decodeJwtHS256(string $jwtToken): array|false
     {
         $tokenParts = explode('.', $jwtToken);
         if (count($tokenParts) !== 3) {
@@ -40,6 +40,10 @@ class JwtHelpers
             data: $tokenParts[0].".".$tokenParts[1],
             key: config('jwt.secret'),
             binary: true);
+        if ($signature !== $expectedSignature) {
+            return false;
+        }
+        return json_decode($payload, true);
     }
 
     protected static function getPayload(JwtToken $jwtToken): string
