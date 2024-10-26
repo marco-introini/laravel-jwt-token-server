@@ -1,0 +1,6 @@
+GET http://jwt-token-server.test/api/checkHs256
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer XXXX
+
+###
