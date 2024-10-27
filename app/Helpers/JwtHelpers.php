@@ -13,6 +13,13 @@ class JwtHelpers
         return rtrim(strtr(base64_encode($input), '+/', '-_'), '=');
     }
 
+    public static function base64UrlDecode($data)
+    {
+        $urlUnsafeData = str_replace(['-', '_'], ['+', '/'], $data);
+        $padding = 4 - (strlen($urlUnsafeData) % 4);
+        return base64_decode($urlUnsafeData . str_repeat('=', $padding));
+    }
+
     public static function createJwtHS256(JwtToken $jwtToken): string
     {
         $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
@@ -78,6 +85,27 @@ class JwtHelpers
         $base64Signature = self::base64UrlEncode($signature);
         return $base64Header.".".$base64Payload.".".$base64Signature;
     }
+
+    public static function decodeJwtRS256(string $jwtToken): array|false
+    {
+        $tokenParts = explode('.', $jwtToken);
+        if (count($tokenParts) !== 3) {
+            return false;
+        }
+        $header = self::base64UrlDecode($tokenParts[0]);
+        $payload = self::base64UrlDecode($tokenParts[1]);
+        $signature = self::base64UrlDecode($tokenParts[2]);
+
+        $signatureBase = "$tokenParts[0].$tokenParts[1]";
+        $publicKey = Storage::disk('keys')->get('rsa_public_key.pem');
+        $result = openssl_verify($signatureBase, $signature, $publicKey, OPENSSL_ALGO_SHA256);
+
+        if ($result !== 1) {
+            return false;
+        }
+        return json_decode($payload, true);
+    }
+
 
     public static function createJwtES256(JwtToken $jwtToken): string
     {
