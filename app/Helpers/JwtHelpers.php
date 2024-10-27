@@ -106,11 +106,4 @@ class JwtHelpers
         return json_decode($payload, true);
     }
 
-
-    public static function createJwtES256(JwtToken $jwtToken): string
-    {
-        return "TODO";
-    }
-
-
 }
