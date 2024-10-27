@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use App\Models\JwtToken;
+use Illuminate\Support\Facades\Storage;
 
 class JwtHelpers
 {
@@ -17,14 +18,14 @@ class JwtHelpers
         $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
         $payload = self::getPayload($jwtToken);
 
-        $base64UrlHeader = self::base64UrlEncode($header);
-        $base64UrlPayload = self::base64UrlEncode($payload);
+        $base64Header = self::base64UrlEncode($header);
+        $base64Payload = self::base64UrlEncode($payload);
         $signature = hash_hmac(algo: 'sha256',
-            data: $base64UrlHeader.".".$base64UrlPayload,
+            data: $base64Header.".".$base64Payload,
             key: config('jwt.secret'),
             binary: true);
-        $base64UrlSignature = self::base64UrlEncode($signature);
-        return $base64UrlHeader.".".$base64UrlPayload.".".$base64UrlSignature;
+        $base64Signature = self::base64UrlEncode($signature);
+        return $base64Header.".".$base64Payload.".".$base64Signature;
     }
 
     public static function decodeJwtHS256(string $jwtToken): array|false
@@ -62,5 +63,26 @@ class JwtHelpers
             'data' => $jwtToken->custom_claims,
         ]);
     }
+
+    public static function createJwtRS256(JwtToken $jwtToken): string
+    {
+        $header = json_encode(['typ' => 'JWT', 'alg' => 'RS256']);
+        $payload = self::getPayload($jwtToken);
+
+        $base64Header = self::base64UrlEncode($header);
+        $base64Payload = self::base64UrlEncode($payload);
+        $signatureBase = "$base64Header.$base64Payload";
+
+        $privateKey = Storage::disk('keys')->get('rsa_private_key.pem');
+        openssl_sign($signatureBase, $signature, $privateKey, OPENSSL_ALGO_SHA256);
+        $base64Signature = self::base64UrlEncode($signature);
+        return $base64Header.".".$base64Payload.".".$base64Signature;
+    }
+
+    public static function createJwtES256(JwtToken $jwtToken): string
+    {
+        return "TODO";
+    }
+
 
 }

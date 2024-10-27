@@ -26,7 +26,9 @@ class LoginController extends ApiController
         $token = $user->jwtTokens()->create();
 
         return $this->success("Login Successful", [
-            'token' => JwtHelpers::createJwtHS256($token),
+            'tokenHS256' => JwtHelpers::createJwtHS256($token),
+            'tokenRS256' => JwtHelpers::createJwtRS256($token),
+            'tokenES256' => JwtHelpers::createJwtES256($token),
         ]);
     }
 }
