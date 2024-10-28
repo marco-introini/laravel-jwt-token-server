@@ -30,6 +30,7 @@ class SimpleJwtLoginController extends ApiController
         return $this->success("Login Successful", [
             'tokenHS256' => SimpleJwtHelper::createJwtHS256($token),
             'tokenRS256' => SimpleJwtHelper::createJwtRS256($token),
+            'tokenES256' => SimpleJwtHelper::createJwtES256($token),
         ]);
     }
 }

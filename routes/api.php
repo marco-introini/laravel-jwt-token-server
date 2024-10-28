@@ -16,6 +16,7 @@ Route::middleware(RequiresJsonMiddleware::class)->group(function () {
        Route::get('login', SimpleJwtLoginController::class);
         Route::get('/checkHs256', [SimpleJwtCheckController::class, 'checkHS256']);
         Route::get('/checkRs256', [SimpleJwtCheckController::class, 'checkRS256']);
+        Route::get('/checkEs256', [SimpleJwtCheckController::class, 'checkES256']);
     });
 });
 

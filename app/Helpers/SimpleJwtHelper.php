@@ -6,11 +6,29 @@ use App\Models\JwtToken;
 use Illuminate\Support\Facades\Storage;
 use SimpleJWT\InvalidTokenException;
 use SimpleJWT\JWT;
+use SimpleJWT\Keys\ECKey;
 use SimpleJWT\Keys\KeySet;
 use SimpleJWT\Keys\RSAKey;
 
 class SimpleJwtHelper
 {
+    protected static function getPayload(JwtToken $jwtToken): array
+    {
+        $now = time();
+        $jwtToken->expires_at = $now + config('jwt.ttl');
+        $jwtToken->save();
+
+        return [
+            'jti' => $jwtToken->id,
+            'sub' => $jwtToken->user->email,
+            'aud' => config('jwt.aud'),
+            'iss' => config('jwt.iss'),
+            'iat' => $now,
+            'exp' => $now + config('jwt.ttl'),
+            'data' => $jwtToken->custom_claims,
+        ];
+    }
+
     public static function createJwtHS256(JwtToken $jwtToken): string
     {
         $set = KeySet::createFromSecret(config('jwt.secret'));
@@ -33,23 +51,6 @@ class SimpleJwtHelper
         return $jwt->getClaims();
     }
 
-    protected static function getPayload(JwtToken $jwtToken): array
-    {
-        $now = time();
-        $jwtToken->expires_at = $now + config('jwt.ttl');
-        $jwtToken->save();
-
-        return [
-            'jti' => $jwtToken->id,
-            'sub' => $jwtToken->user->email,
-            'aud' => config('jwt.aud'),
-            'iss' => config('jwt.iss'),
-            'iat' => $now,
-            'exp' => $now + config('jwt.ttl'),
-            'data' => $jwtToken->custom_claims,
-        ];
-    }
-
     public static function createJwtRS256(JwtToken $jwtToken): string
     {
         $set = new KeySet();
@@ -69,6 +70,31 @@ class SimpleJwtHelper
         $set->add($key);
         try {
             $jwt = JWT::decode($jwtToken, $set, 'RS256');
+        } catch (InvalidTokenException $e) {
+            return false;
+        }
+        return $jwt->getClaims();
+    }
+
+    public static function createJwtES256(JwtToken $jwtToken): string
+    {
+        $set = new KeySet();
+        $key = new ECKey(Storage::disk('keys')->get('ecdsa_private_key.pem'), 'pem');
+        $set->add($key);
+        $header = ['typ' => 'JWT', 'alg' => 'ES256'];
+        $payload = self::getPayload($jwtToken);
+        $jwt = new JWT($header, $payload);
+
+        return $jwt->encode($set);
+    }
+
+    public static function decodeJwtES256(string $jwtToken): array|false
+    {
+        $set = new KeySet();
+        $key = new ECKey(Storage::disk('keys')->get('ecdsa_public_key.pem'), 'pem');
+        $set->add($key);
+        try {
+            $jwt = JWT::decode($jwtToken, $set, 'ES256');
         } catch (InvalidTokenException $e) {
             return false;
         }
