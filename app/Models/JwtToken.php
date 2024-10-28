@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Helpers\JwtHelpers;
+use App\Helpers\JwtHelper;
 use App\Models\Scopes\ActiveJwtScope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;

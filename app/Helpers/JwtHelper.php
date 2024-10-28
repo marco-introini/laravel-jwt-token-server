@@ -5,7 +5,7 @@ namespace App\Helpers;
 use App\Models\JwtToken;
 use Illuminate\Support\Facades\Storage;
 
-class JwtHelpers
+class JwtHelper
 {
 
     public static function base64UrlEncode($input): string
