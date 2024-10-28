@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Storage;
 use SimpleJWT\InvalidTokenException;
 use SimpleJWT\JWT;
 use SimpleJWT\Keys\KeySet;
+use SimpleJWT\Keys\RSAKey;
 
 class SimpleJwtHelper
 {
@@ -29,7 +30,7 @@ class SimpleJwtHelper
         } catch (InvalidTokenException $e) {
             return false;
         }
-        return json_decode($jwt->getClaims(), true);
+        return $jwt->getClaims();
     }
 
     protected static function getPayload(JwtToken $jwtToken): array
@@ -51,17 +52,26 @@ class SimpleJwtHelper
 
     public static function createJwtRS256(JwtToken $jwtToken): string
     {
-        $header = json_encode(['typ' => 'JWT', 'alg' => 'RS256']);
+        $set = new KeySet();
+        $key = new RSAKey(Storage::disk('keys')->get('rsa_private_key.pem'), 'pem');
+        $set->add($key);
+        $header = ['typ' => 'JWT', 'alg' => 'RS256'];
         $payload = self::getPayload($jwtToken);
+        $jwt = new JWT($header, $payload);
 
-
-
-        return "";
+        return $jwt->encode($set);
     }
 
     public static function decodeJwtRS256(string $jwtToken): array|false
     {
-
-        return json_decode("", true);
+        $set = new KeySet();
+        $key = new RSAKey(Storage::disk('keys')->get('rsa_public_key.pem'), 'pem');
+        $set->add($key);
+        try {
+            $jwt = JWT::decode($jwtToken, $set, 'RS256');
+        } catch (InvalidTokenException $e) {
+            return false;
+        }
+        return $jwt->getClaims();
     }
 }
