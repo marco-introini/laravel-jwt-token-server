@@ -127,6 +127,11 @@ Example routes are defined in routes/api.php:
     });
 ```
 
+# RSA GO Server
+
+To demonstrate the distributed capabilities of RSA JWT Signature there is also a basic server in Go inside the `go_app`
+directory which only uses the public RSA key
+
 # Contributing
 
 Feel free to submit issues and enhancement requests.
